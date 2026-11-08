@@ -1,4 +1,5 @@
-name: APK Derle
+
+name: Gündüz Gece APK Derle
 
 on:
   push:
@@ -8,28 +9,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+    steps:
+      - name: Kaynak kodları indir
+        uses: actions/checkout@v4
+
+      - name: Java 17 kur
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Zip ac ve APK derle
-        run: |
-          set -e
-          ZIP=$(ls *.zip | head -1)
-          mkdir -p _src
-          unzip -q -o "$ZIP" -d _src
-          GR=$(find _src -name gradlew -type f | head -1)
-          cd "$(dirname "$GR")"
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
-          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/ekitap-okuyucu.apk"
+      - name: Gradle kur
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
-      - name: APK dosyasini yukle
+      - name: Android SDK kur
+        uses: android-actions/setup-android@v3
+
+      - name: APK oluştur
+        run: gradle assembleDebug
+
+      - name: APK dosyasını yükle
         uses: actions/upload-artifact@v4
         with:
-          name: ekitap-okuyucu-apk
-          path: ekitap-okuyucu.apk
+          name: Gunduz-Gece-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
